@@ -1,0 +1,18 @@
+# Node
+frontend/node_modules
+
+# Java
+backend/target
+
+# Environment
+.env
+
+# VS Code
+.vscode
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
