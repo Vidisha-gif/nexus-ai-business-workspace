@@ -6,47 +6,45 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(name = "employees")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class Employee {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String firstName;
 
+    @Column(nullable = false)
     private String lastName;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
-    private String password;
+    private String department;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    private String designation;
+
+    private Double salary;
 
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
 
     @PrePersist
-    public void prePersist() {
+    public void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
-
-        if (role == null) {
-            role = Role.EMPLOYEE;
-        }
     }
 
     @PreUpdate
-    public void preUpdate() {
+    public void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
 }

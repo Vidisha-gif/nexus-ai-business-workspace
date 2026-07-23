@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 
 import com.nexusai.backend.jwt.JwtAuthenticationFilter;
 
@@ -69,7 +70,12 @@ public class SecurityConfig {
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
                 )
-                .httpBasic(Customizer.withDefaults());
+                .exceptionHandling(exception ->
+                    exception.authenticationEntryPoint(
+                      (request, response, authException) ->
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
+               )
+            );
 
         return http.build();
     }
