@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.nexusai.backend.entity.Role;
 import com.nexusai.backend.entity.User;
+import com.nexusai.backend.exception.EmailAlreadyExistsException;
 import com.nexusai.backend.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ public class AuthService {
     public User register(User user) {
 
         if (userRepository.existsByEmail(user.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new EmailAlreadyExistsException("Email already exists");
         }
 
         user.setPassword(
