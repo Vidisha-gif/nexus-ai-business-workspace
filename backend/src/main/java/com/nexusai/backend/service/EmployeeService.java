@@ -15,7 +15,9 @@ public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
 
+    // ==========================
     // Create Employee
+    // ==========================
     public EmployeeResponse createEmployee(EmployeeRequest request) {
 
         if (employeeRepository.existsByEmail(request.getEmail())) {
@@ -36,7 +38,9 @@ public class EmployeeService {
         return mapToResponse(savedEmployee);
     }
 
+    // ==========================
     // Get All Employees
+    // ==========================
     public List<EmployeeResponse> getAllEmployees() {
 
         return employeeRepository.findAll()
@@ -45,7 +49,9 @@ public class EmployeeService {
                 .toList();
     }
 
+    // ==========================
     // Get Employee By Id
+    // ==========================
     public EmployeeResponse getEmployeeById(Long id) {
 
         Employee employee = employeeRepository.findById(id)
@@ -54,7 +60,40 @@ public class EmployeeService {
         return mapToResponse(employee);
     }
 
+    // ==========================
+    // Update Employee
+    // ==========================
+    public EmployeeResponse updateEmployee(Long id, EmployeeRequest request) {
+
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+        employee.setFirstName(request.getFirstName());
+        employee.setLastName(request.getLastName());
+        employee.setEmail(request.getEmail());
+        employee.setDepartment(request.getDepartment());
+        employee.setDesignation(request.getDesignation());
+        employee.setSalary(request.getSalary());
+
+        Employee updatedEmployee = employeeRepository.save(employee);
+
+        return mapToResponse(updatedEmployee);
+    }
+
+    // ==========================
+    // Delete Employee
+    // ==========================
+    public void deleteEmployee(Long id) {
+
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+        employeeRepository.delete(employee);
+    }
+
+    // ==========================
     // Common Mapper
+    // ==========================
     private EmployeeResponse mapToResponse(Employee employee) {
 
         return EmployeeResponse.builder()
