@@ -3,6 +3,8 @@ package com.nexusai.backend.service;
 import com.nexusai.backend.dto.EmployeeRequest;
 import com.nexusai.backend.dto.EmployeeResponse;
 import com.nexusai.backend.entity.Employee;
+import com.nexusai.backend.exception.DuplicateResourceException;
+import com.nexusai.backend.exception.ResourceNotFoundException;
 import com.nexusai.backend.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +23,7 @@ public class EmployeeService {
     public EmployeeResponse createEmployee(EmployeeRequest request) {
 
         if (employeeRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Employee email already exists");
+            throw new DuplicateResourceException("Employee email already exists");
         }
 
         Employee employee = Employee.builder()
@@ -55,7 +57,8 @@ public class EmployeeService {
     public EmployeeResponse getEmployeeById(Long id) {
 
         Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Employee not found with id: " + id));
 
         return mapToResponse(employee);
     }
@@ -66,7 +69,8 @@ public class EmployeeService {
     public EmployeeResponse updateEmployee(Long id, EmployeeRequest request) {
 
         Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Employee not found with id: " + id));
 
         employee.setFirstName(request.getFirstName());
         employee.setLastName(request.getLastName());
@@ -86,7 +90,8 @@ public class EmployeeService {
     public void deleteEmployee(Long id) {
 
         Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Employee not found with id: " + id));
 
         employeeRepository.delete(employee);
     }
