@@ -8,6 +8,10 @@ import com.nexusai.backend.exception.ResourceNotFoundException;
 import com.nexusai.backend.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
@@ -57,8 +61,8 @@ public class EmployeeService {
     public EmployeeResponse getEmployeeById(Long id) {
 
         Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Employee not found with id: " + id));
+                .orElseThrow(()
+                        -> new ResourceNotFoundException("Employee not found with id: " + id));
 
         return mapToResponse(employee);
     }
@@ -69,8 +73,8 @@ public class EmployeeService {
     public EmployeeResponse updateEmployee(Long id, EmployeeRequest request) {
 
         Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Employee not found with id: " + id));
+                .orElseThrow(()
+                        -> new ResourceNotFoundException("Employee not found with id: " + id));
 
         employee.setFirstName(request.getFirstName());
         employee.setLastName(request.getLastName());
@@ -90,8 +94,8 @@ public class EmployeeService {
     public void deleteEmployee(Long id) {
 
         Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Employee not found with id: " + id));
+                .orElseThrow(()
+                        -> new ResourceNotFoundException("Employee not found with id: " + id));
 
         employeeRepository.delete(employee);
     }
@@ -110,5 +114,41 @@ public class EmployeeService {
                 .designation(employee.getDesignation())
                 .salary(employee.getSalary())
                 .build();
+    }
+
+    public Page<EmployeeResponse> getAllEmployees(int page, int size, String sortBy, String direction) {
+
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        return employeeRepository.findAll(pageable)
+                .map(this::mapToResponse);
+    }
+
+    public Page<EmployeeResponse> searchEmployees(
+            String keyword,
+            int page,
+            int size,
+            String sortBy,
+            String direction) {
+
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        return employeeRepository
+                .findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrDepartmentContainingIgnoreCase(
+                        keyword,
+                        keyword,
+                        keyword,
+                        keyword,
+                        pageable
+                )
+                .map(this::mapToResponse);
     }
 }

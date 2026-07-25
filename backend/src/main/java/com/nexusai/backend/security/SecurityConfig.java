@@ -48,50 +48,45 @@ public class SecurityConfig {
 
         http
                 .csrf(AbstractHttpConfigurer::disable)
-
-                .headers(headers ->
-                        headers.frameOptions(frame -> frame.disable())
+                .headers(headers
+                        -> headers.frameOptions(frame -> frame.disable())
                 )
-
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionManagement(session
+                        -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-
                 .authenticationProvider(authenticationProvider())
-
                 .authorizeHttpRequests(auth -> auth
-
-                        // Public APIs
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
-
-                        // Employee APIs
-                        .requestMatchers(HttpMethod.GET, "/api/employees/**")
-                        .hasAnyRole("ADMIN", "EMPLOYEE")
-
-                        .requestMatchers(HttpMethod.POST, "/api/employees/**")
-                        .hasRole("ADMIN")
-
-                        .requestMatchers(HttpMethod.PUT, "/api/employees/**")
-                        .hasRole("ADMIN")
-
-                        .requestMatchers(HttpMethod.DELETE, "/api/employees/**")
-                        .hasRole("ADMIN")
-
-                        // Other APIs
-                        .anyRequest().authenticated()
+                // Public APIs
+                .requestMatchers("/api/auth/**").permitAll()
+                // H2 Console
+                .requestMatchers("/h2-console/**").permitAll()
+                // Swagger
+                .requestMatchers(
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html"
+                ).permitAll()
+                // Employee APIs
+                .requestMatchers(HttpMethod.GET, "/api/employees/**")
+                .hasAnyRole("ADMIN", "EMPLOYEE")
+                .requestMatchers(HttpMethod.POST, "/api/employees/**")
+                .hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/employees/**")
+                .hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/employees/**")
+                .hasRole("ADMIN")
+                // All other APIs
+                .anyRequest().authenticated()
                 )
-
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
                 )
-
-                .exceptionHandling(exception ->
-                        exception.authenticationEntryPoint(
-                                (request, response, ex) ->
-                                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
-                        )
+                .exceptionHandling(exception -> exception
+                .authenticationEntryPoint((request, response, ex)
+                        -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED))
+                .accessDeniedHandler((request, response, ex)
+                        -> response.sendError(HttpServletResponse.SC_FORBIDDEN))
                 );
 
         return http.build();

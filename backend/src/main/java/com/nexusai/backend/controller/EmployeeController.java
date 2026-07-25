@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -34,9 +36,16 @@ public class EmployeeController {
     // Get All Employees
     // ==========================
     @GetMapping
-    public ResponseEntity<List<EmployeeResponse>> getAllEmployees() {
+    public ResponseEntity<Page<EmployeeResponse>> getAllEmployees(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction
+    ) {
 
-        return ResponseEntity.ok(employeeService.getAllEmployees());
+        return ResponseEntity.ok(
+                employeeService.getAllEmployees(page, size, sortBy, direction)
+        );
     }
 
     // ==========================
@@ -70,6 +79,26 @@ public class EmployeeController {
         employeeService.deleteEmployee(id);
 
         return ResponseEntity.ok("Employee deleted successfully");
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<EmployeeResponse>> searchEmployees(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction
+    ) {
+
+        return ResponseEntity.ok(
+                employeeService.searchEmployees(
+                        keyword,
+                        page,
+                        size,
+                        sortBy,
+                        direction
+                )
+        );
     }
 
 }
