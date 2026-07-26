@@ -5,13 +5,10 @@ import com.nexusai.backend.dto.EmployeeResponse;
 import com.nexusai.backend.service.EmployeeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/employees")
@@ -20,9 +17,6 @@ public class EmployeeController {
 
     private final EmployeeService employeeService;
 
-    // ==========================
-    // Create Employee
-    // ==========================
     @PostMapping
     public ResponseEntity<EmployeeResponse> createEmployee(
             @Valid @RequestBody EmployeeRequest request) {
@@ -32,46 +26,38 @@ public class EmployeeController {
                 .body(employeeService.createEmployee(request));
     }
 
-    // ==========================
-    // Get All Employees
-    // ==========================
     @GetMapping
     public ResponseEntity<Page<EmployeeResponse>> getAllEmployees(
+
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String direction
-    ) {
+            @RequestParam(defaultValue = "asc") String direction) {
 
         return ResponseEntity.ok(
                 employeeService.getAllEmployees(page, size, sortBy, direction)
         );
     }
 
-    // ==========================
-    // Get Employee By ID
-    // ==========================
     @GetMapping("/{id}")
     public ResponseEntity<EmployeeResponse> getEmployeeById(
             @PathVariable Long id) {
 
-        return ResponseEntity.ok(employeeService.getEmployeeById(id));
+        return ResponseEntity.ok(
+                employeeService.getEmployeeById(id)
+        );
     }
 
-    // ==========================
-    // Update Employee
-    // ==========================
     @PutMapping("/{id}")
     public ResponseEntity<EmployeeResponse> updateEmployee(
             @PathVariable Long id,
             @Valid @RequestBody EmployeeRequest request) {
 
-        return ResponseEntity.ok(employeeService.updateEmployee(id, request));
+        return ResponseEntity.ok(
+                employeeService.updateEmployee(id, request)
+        );
     }
 
-    // ==========================
-    // Delete Employee
-    // ==========================
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteEmployee(
             @PathVariable Long id) {
@@ -83,12 +69,12 @@ public class EmployeeController {
 
     @GetMapping("/search")
     public ResponseEntity<Page<EmployeeResponse>> searchEmployees(
+
             @RequestParam String keyword,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String direction
-    ) {
+            @RequestParam(defaultValue = "asc") String direction) {
 
         return ResponseEntity.ok(
                 employeeService.searchEmployees(
@@ -100,5 +86,4 @@ public class EmployeeController {
                 )
         );
     }
-
 }

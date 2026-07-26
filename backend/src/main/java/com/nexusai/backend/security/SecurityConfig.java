@@ -47,10 +47,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                .csrf(AbstractHttpConfigurer::disable)
-                .headers(headers
-                        -> headers.frameOptions(frame -> frame.disable())
-                )
+        .csrf(AbstractHttpConfigurer::disable)
+        .cors(cors -> {})
+        .headers(headers
+                -> headers.frameOptions(frame -> frame.disable())
+        )
                 .sessionManagement(session
                         -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
@@ -70,11 +71,13 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/employees/**")
                 .hasAnyRole("ADMIN", "EMPLOYEE")
                 .requestMatchers(HttpMethod.POST, "/api/employees/**")
-                .hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/employees/**")
-                .hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/employees/**")
-                .hasRole("ADMIN")
+.hasAnyRole("ADMIN", "EMPLOYEE")
+
+.requestMatchers(HttpMethod.PUT, "/api/employees/**")
+.hasAnyRole("ADMIN", "EMPLOYEE")
+
+.requestMatchers(HttpMethod.DELETE, "/api/employees/**")
+.hasAnyRole("ADMIN", "EMPLOYEE")
                 // All other APIs
                 .anyRequest().authenticated()
                 )

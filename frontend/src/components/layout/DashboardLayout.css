@@ -1,0 +1,20 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+.layout{
+    display:flex;
+    background:#f8fafc;
+}
+
+.main{
+    flex:1;
+    height:100vh;
+    overflow:auto;
+}
+
+.content{
+    padding:30px;
+}
