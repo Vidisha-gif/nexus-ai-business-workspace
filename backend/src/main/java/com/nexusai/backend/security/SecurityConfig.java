@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -47,49 +46,67 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-        .csrf(AbstractHttpConfigurer::disable)
-        .cors(cors -> {})
-        .headers(headers
-                -> headers.frameOptions(frame -> frame.disable())
-        )
-                .sessionManagement(session
-                        -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> {})
+                .headers(headers ->
+                        headers.frameOptions(frame -> frame.disable())
+                )
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authenticationProvider(authenticationProvider())
+
                 .authorizeHttpRequests(auth -> auth
-                // Public APIs
-                .requestMatchers("/api/auth/**").permitAll()
-                // H2 Console
-                .requestMatchers("/h2-console/**").permitAll()
-                // Swagger
-                .requestMatchers(
-                        "/v3/api-docs/**",
-                        "/swagger-ui/**",
-                        "/swagger-ui.html"
-                ).permitAll()
-                // Employee APIs
-                .requestMatchers(HttpMethod.GET, "/api/employees/**")
-                .hasAnyRole("ADMIN", "EMPLOYEE")
-                .requestMatchers(HttpMethod.POST, "/api/employees/**")
-.hasAnyRole("ADMIN", "EMPLOYEE")
 
-.requestMatchers(HttpMethod.PUT, "/api/employees/**")
-.hasAnyRole("ADMIN", "EMPLOYEE")
+                        // ==========================
+                        // Public APIs
+                        // ==========================
+                        .requestMatchers("/api/auth/**").permitAll()
 
-.requestMatchers(HttpMethod.DELETE, "/api/employees/**")
-.hasAnyRole("ADMIN", "EMPLOYEE")
-                // All other APIs
-                .anyRequest().authenticated()
+                        // H2 Console
+                        .requestMatchers("/h2-console/**").permitAll()
+
+                        // Swagger
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
+
+                        // ==========================
+                        // ADMIN ONLY
+                        // ==========================
+                        .requestMatchers("/api/employees/**").hasRole("ADMIN")
+                        .requestMatchers("/api/departments/**").hasRole("ADMIN")
+                        .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
+                        .requestMatchers("/api/reports/**").hasRole("ADMIN")
+
+                        // ==========================
+                        // ADMIN + EMPLOYEE
+                        // ==========================
+                        .requestMatchers("/api/users/**").hasAnyRole("ADMIN", "EMPLOYEE")
+                        .requestMatchers("/api/ai/**").hasAnyRole("ADMIN", "EMPLOYEE")
+
+                        // ==========================
+                        // Any Authenticated User
+                        // ==========================
+                        .anyRequest().authenticated()
                 )
+
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, ex) -> {
+                            ex.printStackTrace();
+                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                        })
+                        .accessDeniedHandler((request, response, ex) -> {
+                            ex.printStackTrace();
+                            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        })
+                )
+
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
-                )
-                .exceptionHandling(exception -> exception
-                .authenticationEntryPoint((request, response, ex)
-                        -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED))
-                .accessDeniedHandler((request, response, ex)
-                        -> response.sendError(HttpServletResponse.SC_FORBIDDEN))
                 );
 
         return http.build();
